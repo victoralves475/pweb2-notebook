@@ -1,0 +1,131 @@
+# Plataforma JEE e Aplicações Web
+
+**Contexto Histórico (J2EE/JEE)**:  
+A plataforma **JEE (Java Enterprise Edition)** surgiu para padronizar e facilitar o desenvolvimento de aplicações empresariais em Java, oferecendo especificações para transações distribuídas, segurança, persistência de dados, serviços de mensagens, entre outros. O modelo J2EE clássico utilizava recursos como **EJBs (Enterprise Java Beans)**, frequentemente considerados complexos e pesados.
+
+**Multi-Camadas**:  
+As aplicações JEE tipicamente seguem uma arquitetura multicamadas (cliente, camada web, camada de negócio, camada de dados), com Servlets e JSPs na camada web e EJBs na camada de negócio.
+
+**Containers e Comportamentos**:  
+O JEE introduziu a ideia de containers (como Servlets Containers e EJB Containers) que gerenciam o ciclo de vida dos componentes, segurança, transações e recursos de rede, simplificando o trabalho do desenvolvedor.
+
+**Problemas com EJBs Antigos**:  
+- Complexidade e “peso” no desenvolvimento.  
+- Necessidade de descritores de implantação extensos em XML.  
+- Forte acoplamento ao modelo J2EE.
+
+---
+
+### Surgimento do Spring Framework
+
+**Rod Johnson e a Simplificação**:  
+Como resposta à complexidade do J2EE tradicional, Rod Johnson propôs uma abordagem mais simples e leve, originando o **Spring Framework**. O Spring trouxe uma filosofia baseada em **Inversão de Controle (IoC)** e **Injeção de Dependência (DI)**, permitindo que o container (o Spring IoC Container) gerencie a criação e o fornecimento de dependências, tornando as classes mais simples e testáveis (usando POJOs).
+
+**Inversão de Controle (IoC)**:  
+- Em vez de o próprio código criar seus objetos, o container faz isso.  
+- Objetos (beans) são configurados externamente (via anotações ou configuração Java/XML).
+
+**Injeção de Dependência (DI)**:  
+- Ao precisar de um objeto X, você não o cria diretamente; o container injeta X onde necessário.  
+- Reduz acoplamento e facilita testes (mocks, stubs).
+
+**POJOs**:  
+- Classes simples, sem herança de estruturas complexas ou dependências pesadas.  
+- São a base dos componentes do Spring (Services, Repositories, Controllers).
+
+---
+
+### Spring MVC e Desenvolvimento Web
+
+**Padrão MVC no Spring**:  
+- **Model**: Dados e lógica de negócio.  
+- **View**: Interface com o usuário (HTML, templates Thymeleaf, JSP...).  
+- **Controller**: Recebe requisições, acessa o Model (serviços, repositórios), determina a View a ser retornada.
+
+**@Controller e Mapeamento de Rotas**:  
+- `@Controller` indica classes que lidam com requisições HTTP.  
+- `@RequestMapping`, `@GetMapping`, `@PostMapping` mapeiam métodos a URLs específicas, definindo qual método responde a qual requisição.
+
+**@ModelAttribute**:  
+- Permite disponibilizar objetos no modelo para todas as views atendidas por aquele controller, sem precisar configurar em cada método.  
+- Útil para fornecer dados comuns, como listas de categorias ou dados de autenticação.
+
+---
+
+### Thymeleaf
+
+**Template Engine**:  
+- O **Thymeleaf** permite criar páginas HTML dinâmicas, integrando-se perfeitamente ao Spring MVC.  
+- Ao retornar o nome de uma view “index”, o resolver encontra `index.html` em `src/main/resources/templates`, não sendo necessário passar a extensão no código do controlador.
+
+**Atributos Thymeleaf**:  
+- `th:text`, `th:if`, `th:each`, `th:object` e outros tornam o HTML dinâmico.  
+- `th:each` é usado para iterar sobre coleções.  
+- `{...}` acessa propriedades de um objeto associado ao `th:object` (típico em formulários).
+
+---
+
+### JSP-EL e Acesso a Dados em Páginas
+
+**Expressão JSP-EL (`${...}`)**:  
+- Flexível no acesso: pode acessar propriedades de objetos, índices de listas/arrays e chaves de mapas.  
+- Não se limita a apenas um tipo de estrutura, sendo versátil para buscar dados no contexto.
+
+---
+
+### Post-Redirect-GET (PRG) e Redirect no Spring
+
+**Problema do reenvio de formulário**:  
+- Ao enviar um POST e retornar diretamente uma view, pressionar F5 reenviará o POST, duplicando operações (como cadastrar o mesmo item várias vezes).
+
+**Solução com Redirect**:  
+- Após processar o POST, retorna-se `redirect:/algumaURL`.  
+- O navegador faz um GET nessa nova URL, prevenindo o reenvio do POST ao pressionar F5.  
+- Esse padrão é chamado Post-Redirect-GET (PRG).
+
+---
+
+### Injeção de Dependências no Spring
+
+**Tornar um Objeto Injetável**:  
+- Anotar a classe com `@Component`, `@Service`, `@Repository`, `@Controller` ou declarar beans em classes de configuração (`@Configuration` + `@Bean`).  
+- O Spring IoC Container gerencia esses beans, tornando-os disponíveis para injeção.
+
+**Formas de Injetar**:  
+- `@Autowired`, `@Inject` (JSR-330), `@Resource`.  
+- Podendo injetar via construtor (boa prática), atributo ou setter.
+
+---
+
+### Uso do JPARepository no Spring Data JPA
+
+**JPARepository**:  
+- Interface do Spring Data que simplifica o acesso a dados.  
+- Ao criar uma interface `extends JpaRepository<Entidade, TipoId>`, o Spring fornece métodos CRUD prontos: `save()`, `findAll()`, `findById()`, `delete()`, etc.
+
+**Consultas Personalizadas**:  
+- Por convenção de nome (ex.: `findByNome(String nome)` gera query automaticamente).  
+- Com `@Query` para consultas mais complexas, usando JPQL ou SQL nativo.
+
+---
+
+### Exceções e Tratamento de Erros (Caso Tenha Sido Mencionado)
+
+**Tratamento de Exceções Local ou Global**:  
+- `@ExceptionHandler` no próprio controlador para tratar exceções específicas daquele contexto.  
+- `@ControllerAdvice` para tratamento global, centralizando a lógica de erro para toda a aplicação.  
+- `@ResponseStatus` em classes de exceção para definir o código HTTP retornado (por exemplo, 404 para recurso não encontrado).
+
+---
+
+### Conclusão Geral
+
+Para se sair bem em avaliações sobre esses tópicos, é essencial entender:
+
+1. **POJOs:** Objetos simples, base da inversão de controle.  
+2. **Spring MVC:** Como `@Controller`, `@RequestMapping`, `@ModelAttribute` e `@Autowired` funcionam.  
+3. **Thymeleaf:** Sintaxe básica, `th:each` para iteração, `th:object` para formulários, flexibilidade no retorno de views.  
+4. **JSP-EL:** Capacidade de acessar propriedades, listas, arrays e mapas.  
+5. **PRG (Post-Redirect-GET):** Solução ao problema do reenvio de POSTs após F5.  
+6. **Injeção de Dependência:** Criação de beans gerenciados pelo Spring, injetando-os via `@Autowired` ou `@Inject`.  
+7. **Spring Data JPA e JpaRepository:** Simplificação do acesso ao banco de dados, queries automáticas por convenção, queries personalizadas com `@Query`.
